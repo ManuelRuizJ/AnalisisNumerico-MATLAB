@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[classdef EcuacionesNL < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                  matlab.ui.Figure
+        TabGroup                  matlab.ui.container.TabGroup
+        BiseccinTab               matlab.ui.container.Tab
+        UIAxes                    matlab.ui.control.UIAxes
+        fxEditFieldLabel          matlab.ui.control.Label
+        fxEditField               matlab.ui.control.EditField
+        aEditFieldLabel           matlab.ui.control.Label
+        aEditField                matlab.ui.control.NumericEditField
+        bEditFieldLabel           matlab.ui.control.Label
+        bEditField                matlab.ui.control.NumericEditField
+        ToleranciaEditFieldLabel  matlab.ui.control.Label
+        ToleranciaEditField       matlab.ui.control.NumericEditField
+        RaizEditFieldLabel        matlab.ui.control.Label
+        RaizEditField             matlab.ui.control.EditField
+        GrficaButton              matlab.ui.control.Button
+        PlayButton                matlab.ui.control.Button
+        Tab2                      matlab.ui.container.Tab
+    end
+
+    
+    methods (Access = private)
+        
+        function c=Biseccion(~,f,a,b,tol)
+            % Método de Bisección
+            % Este programa calcula la raiz de la función f en el intervalo [a,b]
+            % tol = Tolerancia del error absoluto
+            % La funciónf debe ser definida del tipo anonima
+            
+            n = log((b-a)/tol)/log(2);
+            n = ceil(n); % entero inmediato superior a n
+            
+            if f(a)*f(b)>0
+                c='error';
+                return;
+            else
+                for k = 1:n
+                    c = (a+b)/2; % punto medio
+                    
+                    if f(a)*f(b)<0
+                        b = c; % cambio de valor
+                    else
+                        a=c; % cambio de valor
+                    end
+                end
+            end
+            c = num2str(c);
+        end
+        
+        function Grafica(app)
+            f=app.fxEditField.Value;
+            A = ['@(x)',f];
+            f=str2func(A);
+            
+            a = app.aEditField.Value;
+            b = app.bEditField.Value;
+            
+            fplot(app.UIAxes,f,[a,b]);
+            
+        end
+    end
+
+    methods (Access = private)
+
+        % Button pushed function: GrficaButton
+        function GrficaButtonPushed(app, event)
+            app.Grafica();
+        end
+
+        % Button pushed function: PlayButton
+        function PlayButtonPushed(app, event)
+            f=app.fxEditField.Value;
+            A = ['@(x)',f];
+            f=str2func(A);
+            a = app.aEditField.Value;
+            b = app.bEditField.Value;
+            tol = app.ToleranciaEditField.Value;
+            
+            c = app.Biseccion(f,a,b,tol);
+            app.RaizEditField.Value=c;
+            app.Grafica;
+        end
+    end
+
+    % App initialization and construction
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure
+            app.UIFigure = uifigure;
+            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Name = 'UI Figure';
+
+            % Create TabGroup
+            app.TabGroup = uitabgroup(app.UIFigure);
+            app.TabGroup.Position = [1 1 640 480];
+
+            % Create BiseccinTab
+            app.BiseccinTab = uitab(app.TabGroup);
+            app.BiseccinTab.Title = 'Bisección';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.BiseccinTab);
+            title(app.UIAxes, 'Método de Bisección')
+            xlabel(app.UIAxes, 'X')
+            ylabel(app.UIAxes, 'Y')
+            app.UIAxes.Position = [39 152 561 284];
+
+            % Create fxEditFieldLabel
+            app.fxEditFieldLabel = uilabel(app.BiseccinTab);
+            app.fxEditFieldLabel.HorizontalAlignment = 'right';
+            app.fxEditFieldLabel.Position = [69 131 25 22];
+            app.fxEditFieldLabel.Text = 'f(x)';
+
+            % Create fxEditField
+            app.fxEditField = uieditfield(app.BiseccinTab, 'text');
+            app.fxEditField.HorizontalAlignment = 'center';
+            app.fxEditField.Position = [109 131 100 22];
+
+            % Create aEditFieldLabel
+            app.aEditFieldLabel = uilabel(app.BiseccinTab);
+            app.aEditFieldLabel.HorizontalAlignment = 'right';
+            app.aEditFieldLabel.Position = [69 97 25 22];
+            app.aEditFieldLabel.Text = 'a';
+
+            % Create aEditField
+            app.aEditField = uieditfield(app.BiseccinTab, 'numeric');
+            app.aEditField.HorizontalAlignment = 'center';
+            app.aEditField.Position = [109 97 31 22];
+            app.aEditField.Value = -5;
+
+            % Create bEditFieldLabel
+            app.bEditFieldLabel = uilabel(app.BiseccinTab);
+            app.bEditFieldLabel.HorizontalAlignment = 'right';
+            app.bEditFieldLabel.Position = [69 62 25 22];
+            app.bEditFieldLabel.Text = 'b';
+
+            % Create bEditField
+            app.bEditField = uieditfield(app.BiseccinTab, 'numeric');
+            app.bEditField.HorizontalAlignment = 'center';
+            app.bEditField.Position = [109 62 31 22];
+            app.bEditField.Value = 5;
+
+            % Create ToleranciaEditFieldLabel
+            app.ToleranciaEditFieldLabel = uilabel(app.BiseccinTab);
+            app.ToleranciaEditFieldLabel.HorizontalAlignment = 'right';
+            app.ToleranciaEditFieldLabel.Position = [34 31 60 22];
+            app.ToleranciaEditFieldLabel.Text = 'Tolerancia';
+
+            % Create ToleranciaEditField
+            app.ToleranciaEditField = uieditfield(app.BiseccinTab, 'numeric');
+            app.ToleranciaEditField.HorizontalAlignment = 'center';
+            app.ToleranciaEditField.Position = [109 31 43 22];
+            app.ToleranciaEditField.Value = 1e-09;
+
+            % Create RaizEditFieldLabel
+            app.RaizEditFieldLabel = uilabel(app.BiseccinTab);
+            app.RaizEditFieldLabel.HorizontalAlignment = 'right';
+            app.RaizEditFieldLabel.Position = [349 110 30 22];
+            app.RaizEditFieldLabel.Text = 'Raiz';
+
+            % Create RaizEditField
+            app.RaizEditField = uieditfield(app.BiseccinTab, 'text');
+            app.RaizEditField.Editable = 'off';
+            app.RaizEditField.HorizontalAlignment = 'center';
+            app.RaizEditField.Position = [394 110 100 22];
+
+            % Create GrficaButton
+            app.GrficaButton = uibutton(app.BiseccinTab, 'push');
+            app.GrficaButton.ButtonPushedFcn = createCallbackFcn(app, @GrficaButtonPushed, true);
+            app.GrficaButton.Position = [250 52 100 22];
+            app.GrficaButton.Text = 'Gráfica';
+
+            % Create PlayButton
+            app.PlayButton = uibutton(app.BiseccinTab, 'push');
+            app.PlayButton.ButtonPushedFcn = createCallbackFcn(app, @PlayButtonPushed, true);
+            app.PlayButton.Position = [410 52 100 22];
+            app.PlayButton.Text = 'Play';
+
+            % Create Tab2
+            app.Tab2 = uitab(app.TabGroup);
+            app.Tab2.Title = 'Tab2';
+        end
+    end
+
+    methods (Access = public)
+
+        % Construct app
+        function app = EcuacionesNL
+
+            % Create and configure components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end]]></w:t></w:r></w:p></w:body></w:document>
